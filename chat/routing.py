@@ -4,7 +4,7 @@ from chat.consumers import ChatConsumer
 
 websocket_urlpatterns = [
     re_path(
-        r"ws/chat/room/(?P<room_id>\d+)/$",
+        r"ws/chat/room/(?P<room_name>\w+)/$",
         ChatConsumer.as_asgi(),
         name="chat_room",
     ),
