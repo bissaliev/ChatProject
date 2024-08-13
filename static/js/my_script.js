@@ -1,12 +1,12 @@
-const roomId = JSON.parse(
-    document.getElementById('room-id').textContent
+const roomName = JSON.parse(
+    document.getElementById('room-name').textContent
 );
-const url = 'ws://' + window.location.host + '/ws/chat/room/' + roomId + '/';
+const url = 'ws://' + window.location.host + '/ws/chat/room/' + roomName + '/';
 const chatSocket = new WebSocket(url);
 chatSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
     const chat = document.getElementById("chat");
-    chat.innerHTML += '<div class="card text-bg-info mb-3 p-2 style="max-width: 18rem;">' + data.message +
+    chat.innerHTML += '<div class="d-flex flex-row justify-content-start">' + data.message +
         '</div>';
     chat.scrollTop = chat.scrollHeight;
 };

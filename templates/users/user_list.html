@@ -7,14 +7,14 @@
         <div style="height: 100%;">
             <div class="container-fluid overflow-y-scroll">
                 <div class="row justify-content-center">
-                    {% for room in rooms %}
+                    {% for i in count %}
                     <div class="card m-3" style="width: 18rem;">
                         <img src="{% static 'img/default.png' %}" class="card-img-top" alt="...">
                         <div class="card-body">
-                            <h5 class="card-title">{{ room.name }}</h5>
+                            <h5 class="card-title">Заголовок карточки</h5>
                             <p class="card-text">Небольшой пример текста, который должен основываться на названии
                                 карточки и составлять основную часть содержимого карты.</p>
-                            <a href="{% url 'chat:room' room.room_name %}" class="btn btn-primary">Перейти в комнату</a>
+                            <a href="#" class="btn btn-primary">Перейти куда-нибудь</a>
                         </div>
                     </div>
                     {% endfor %}
