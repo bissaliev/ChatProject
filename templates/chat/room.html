@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="full-height container-fluid text-center" style="background-color: aquamarine;">
+    <div class="full-height container d-flex align-items-center justify-content-center flex-column"
+        style="background-color: azure; ">
+        {{ room_id|json_script:'room-id' }}
+        <div id="chat" class="overflow-y-scroll col-12 p-5" style="height: 85%;"></div>
+        <div id="chat-input" class="input-group mb-3 col-12" style="height: 15%;">
+            <input id="chat-message-input" type="text" class="form-control" placeholder="Написать сообщение"
+                aria-label="Имя пользователя получателя" aria-describedby="button-addon2">
+            <button id="chat-message-submit" class="btn btn-outline-primary" type="button"
+                id="button-addon2">Отправить</button>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/my_script.js' %}"></script>
+{% endblock content %}
