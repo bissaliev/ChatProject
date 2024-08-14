@@ -100,7 +100,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru"
 
 TIME_ZONE = "UTC"
 
@@ -123,5 +123,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CHANNEL_LAYERS = {
     "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
 }
-# LOGIN_REDIRECT_URL = "chat:room"
+LOGIN_REDIRECT_URL = "chat:home"
 LOGOUT_REDIRECT_URL = "login"
