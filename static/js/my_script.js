@@ -51,21 +51,43 @@ function buildingMessageTemplate(data) {
     messageElement.getElementById("message-username").textContent = data.username;
     const timestamp = new Date(data.created_at);
     messageElement.getElementById("message-time").textContent = timeAgo(timestamp);
+    messageElement.getElementById('message-sender-avatar').src = data.avatar;
     return messageElement
 };
 
 // Добавление шаблона сообщения в чат
 function addMessageToChat(data) {
     const chat = document.getElementById("chat");
-    messageElement = buildingMessageTemplate(data)
-    chat.appendChild(messageElement)
+    messageElement = buildingMessageTemplate(data);
+    chat.appendChild(messageElement);
     chat.scrollTop = chat.scrollHeight;
+};
+
+function addUserToRoom(data) {
+    const userList = document.getElementById('user-list');
+    const userItem = document.getElementById('user-template').content.cloneNode(true);
+    userItem.getElementById("field-username").textContent = data.username
+    userItem.getElementById("field-avatar").src = data.avatar
+    userItem.id = "participant-" + data.username;
+    userList.appendChild(userItem);
+};
+
+function remoteUserToRoom(data) {
+    const userList = document.getElementById('user-list');
+    const li = document.getElementById("participant-" + data.username);
+    userList.removeChild(li);
 };
 
 // получение данных через веб-сокет
 chatSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    addMessageToChat(data)
+    if (data.type == "joining_user") {
+        addUserToRoom(data);
+    } else if (data.type == "leaving_user") {
+        remoteUserToRoom(data);
+    } else {
+        addMessageToChat(data);
+    }
 };
 
 // Закрытие вебсокета

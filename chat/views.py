@@ -13,11 +13,16 @@ def room(request, room_name):
         return redirect("login")
     current_room = Room.objects.get(room_name=room_name)
     messages = current_room.messages.all().order_by("created_at")
+    participants = current_room.participants.all().exclude(
+        username=request.user.username
+    )
     return render(
         request,
         "chat/room.html",
         {
             "room_name": room_name,
+            "current_room": current_room,
             "messages": messages,
+            "participants": participants,
         },
     )
