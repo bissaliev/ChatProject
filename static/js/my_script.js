@@ -63,28 +63,28 @@ function addMessageToChat(data) {
     chat.scrollTop = chat.scrollHeight;
 };
 
-function addUserToRoom(data) {
-    const userList = document.getElementById('user-list');
+function buildUserTemplate(user) {
     const userItem = document.getElementById('user-template').content.cloneNode(true);
-    userItem.getElementById("field-username").textContent = data.username
-    userItem.getElementById("field-avatar").src = data.avatar
-    userItem.id = "participant-" + data.username;
-    userList.appendChild(userItem);
-};
+    userItem.getElementById("field-username").textContent = user['username']
+    userItem.getElementById("field-avatar").src = user['avatar']
+    userItem.id = "participant-" + user['avatar'];
+    return userItem;
+}
 
-function remoteUserToRoom(data) {
+function buildUserListTemplate(data) {
     const userList = document.getElementById('user-list');
-    const li = document.getElementById("participant-" + data.username);
-    userList.removeChild(li);
-};
+    userList.innerHTML = "";
+    for (let user of data.users) {
+        template = buildUserTemplate(user);
+        userList.appendChild(template);
+    };
+}
 
 // получение данных через веб-сокет
 chatSocket.onmessage = function (event) {
     const data = JSON.parse(event.data);
-    if (data.type == "joining_user") {
-        addUserToRoom(data);
-    } else if (data.type == "leaving_user") {
-        remoteUserToRoom(data);
+    if (data.type == "user_list") {
+        buildUserListTemplate(data);
     } else {
         addMessageToChat(data);
     }

@@ -25,7 +25,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         room = get_object_or_404(Room, room_name=room_name)
         participant = get_object_or_404(User, username=username)
         room.participants.add(participant)
-        room.save()
 
     @database_sync_to_async
     def remove_participant_from_room(self, room_name, username):
@@ -33,36 +32,49 @@ class ChatConsumer(AsyncWebsocketConsumer):
         participant = get_object_or_404(User, username=username)
         room.participants.remove(participant)
 
+    @database_sync_to_async
+    def get_participants(self, room_name):
+        users = User.objects.filter(rooms__room_name=room_name)
+        return [
+            {"username": user.username, "avatar": user.avatar.url}
+            for user in users
+        ]
+
     async def connect(self):
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = f"chat_{self.room_name}"
         self.user = self.scope["user"]
-        await self.add_participant_to_room(self.room_name, self.user.username)
         await self.channel_layer.group_add(
             self.room_group_name, self.channel_name
         )
+        await self.accept()
+        if self.user.is_authenticated:
+            await self.add_participant_to_room(
+                self.room_name, self.user.username
+            )
+        users = await self.get_participants(self.room_name)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
-                "type": "joining_user",
-                "username": self.user.username,
-                "avatar": self.user.avatar.url,
+                "type": "user_list",
+                "users": users,
             },
         )
-        await self.accept()
 
     async def disconnect(self, code):
-        await self.remove_participant_from_room(
-            self.room_name, self.user.username
-        )
+        if self.user.is_authenticated:
+            await self.remove_participant_from_room(
+                self.room_name, self.user.username
+            )
         await self.channel_layer.group_discard(
             self.room_group_name, self.channel_name
         )
+        users = await self.get_participants(self.room_name)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
-                "type": "leaving_user",
-                "username": self.user.username,
+                "type": "user_list",
+                "users": users,
             },
         )
 
@@ -96,23 +108,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         )
 
-    async def joining_user(self, event):
+    async def user_list(self, event):
         await self.send(
             text_data=json.dumps(
-                {
-                    "type": "joining_user",
-                    "username": event["username"],
-                    "avatar": event["avatar"],
-                }
-            )
-        )
-
-    async def leaving_user(self, event):
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "type": "leaving_user",
-                    "username": event["username"],
-                }
+                {"type": "user_list", "users": event["users"]}
             )
         )
