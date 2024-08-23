@@ -67,7 +67,10 @@ function buildUserTemplate(user) {
     const userItem = document.getElementById('user-template').content.cloneNode(true);
     userItem.getElementById("field-username").textContent = user['username']
     userItem.getElementById("field-avatar").src = user['avatar']
-    userItem.id = "participant-" + user['avatar'];
+    userItem.getElementById("field-text-last-message").textContent = user["last_message"]
+    const timestamp = new Date(user["last_time_message"]);
+    userItem.getElementById("field-time").textContent = timeAgo(timestamp)
+    userItem.id = "participant-" + user['username'];
     return userItem;
 }
 

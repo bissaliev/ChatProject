@@ -3,6 +3,7 @@ import json
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
+from django.db.models import CharField, DateTimeField, OuterRef, Subquery
 from django.shortcuts import get_object_or_404
 
 from .models import Message, Room
@@ -34,9 +35,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_participants(self, room_name):
-        users = User.objects.filter(rooms__room_name=room_name)
+        subquery_content = Subquery(
+            Message.objects.filter(
+                sender_id=OuterRef("id"), room__room_name=room_name
+            )
+            .order_by("-created_at")
+            .values("content"),
+            output_field=CharField(),
+        )
+        subquery_time = Subquery(
+            Message.objects.filter(
+                sender_id=OuterRef("id"), room__room_name=room_name
+            )
+            .order_by("-created_at")
+            .values("created_at"),
+            output_field=DateTimeField(),
+        )
+        users = User.objects.filter(rooms__room_name=room_name).annotate(
+            last_message=subquery_content, last_time_message=subquery_time
+        )
+        print(users[0].last_time_message.isoformat())
         return [
-            {"username": user.username, "avatar": user.avatar.url}
+            {
+                "username": user.username,
+                "avatar": user.avatar.url,
+                "last_message": user.last_message,
+                "last_time_message": user.last_time_message.isoformat(),
+            }
             for user in users
         ]
 
